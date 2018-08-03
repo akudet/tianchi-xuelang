@@ -11,12 +11,25 @@ class BaselineModel(nn.Module):
         for param in resnet.parameters():
             param.requires_grad_(False)
 
-        modules = list(resnet.children())[:-1]
-        self.body = nn.Sequential(*modules)
-        self.head = nn.Linear(2048, 48)
+        modules = list(resnet.children())[:-2]
+        self.body = nn.Sequential(
+            nn.Sequential(*modules),
+            nn.AdaptiveAvgPool2d(1),
+            Flatten(),
+        )
+        self.head = nn.Sequential(
+            nn.Linear(2048, 256),
+            nn.ReLU(),
+            nn.Linear(256, 48),
+        )
 
     def forward(self, x):
         x = self.body(x)
-        x = x.view(-1, self.head.in_features)
         x = self.head(x)
         return x
+
+
+class Flatten(nn.Module):
+
+    def forward(self, x):
+        return x.view(x.shape[0], -1)
