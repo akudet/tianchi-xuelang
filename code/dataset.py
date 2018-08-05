@@ -4,16 +4,16 @@ import torch
 import torch.utils.data as data
 
 
-def get_loader(root, is_train, batch_size=32, transform=None, is_cached=False):
+def get_loader(root, is_train=True, batch_size=32, transform=None, is_cached=False):
     from torchvision.datasets import ImageFolder
 
     if is_train:
         if is_cached:
-            dataset = NumpyDataset()
+            dataset = NumpyDataset(root)
         else:
-            dataset = ImageFolder(os.path.join(root, "train"), transform=transform)
+            dataset = ImageFolder(root, transform=transform)
     else:
-        dataset = ImageDir(os.path.join(root, "test"))
+        dataset = ImageDir(root)
         dataset = TransformDataset(dataset, transform=transform)
 
     loader = data.DataLoader(dataset, batch_size=batch_size, shuffle=is_train, num_workers=6)
@@ -35,7 +35,7 @@ def process_inputs(inputs, model, n_epochs):
     return outputs
 
 
-def prepare_data(inputs, model, n_epochs=3):
+def prepare_data(inputs, model, root, n_epochs=3):
     import numpy as np
 
     with torch.no_grad():
@@ -43,17 +43,17 @@ def prepare_data(inputs, model, n_epochs=3):
 
     x = [d for d, _ in d]
     y = [d.reshape(-1, 1) for _, d in d]
-    np.save("x.npy", np.vstack(x))
-    np.save("y.npy", np.vstack(y).reshape(-1))
+    np.save(os.path.join(root, "x.npy"), np.vstack(x))
+    np.save(os.path.join(root, "y.npy"), np.vstack(y).reshape(-1))
 
 
 class NumpyDataset(data.Dataset):
 
-    def __init__(self):
+    def __init__(self, root):
         import numpy as np
 
-        self.x = np.load("x.npy")
-        self.y = np.load("y.npy")
+        self.x = np.load(os.path.join(root, "x.npy"))
+        self.y = np.load(os.path.join(root, "y.npy"))
 
     def __getitem__(self, index):
         x = self.x[index]
