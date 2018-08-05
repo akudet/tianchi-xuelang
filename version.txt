@@ -1,0 +1,10 @@
+Distributor ID:	Ubuntu
+Description:	Ubuntu 16.04.5 LTS
+Release:	16.04
+Codename:	xenial
+
+主要依赖包，详细的依赖包列表请参照environment.yml文件
+python=3.6.5
+pytorch=0.4.0
+pandas=0.23.1
+numpy=1.14.5
